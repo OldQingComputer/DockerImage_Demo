@@ -1,0 +1,38 @@
+name: Build and Export Docker Image
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 检出仓库代码
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 设置 Docker Buildx
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      # 使用仓库中的 Dockerfile 构建镜像
+      - name: Build Docker image
+        run: |
+          docker build -t dockerimage_demo:latest .
+
+      # 将镜像导出为 tar 文件
+      - name: Export Docker image to tar
+        run: |
+          docker save -o DockerImage_Demo.tar dockerimage_demo:latest
+
+      # 上传 tar 文件作为 Actions 构件
+      - name: Upload Docker image artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: DockerImage_Demo
+          path: DockerImage_Demo.tar
